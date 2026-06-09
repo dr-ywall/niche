@@ -11,7 +11,7 @@
   :root {
     --black: #0a0a0f;
     --lavender: #b48eff;
-    --coral: #ff5f6d;
+    --sage: #8DB89A;
     --bone: #e8e0d0;
     --fog: #2a2a38;
     --fog-light: #3a3a4e;
@@ -76,7 +76,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--coral), var(--lavender));
+    background: linear-gradient(90deg, var(--sage), var(--lavender));
   }
 
   .result-container {
@@ -96,8 +96,9 @@
     transition: opacity 0.08s;
   }
 
-  .word-top { color: var(--coral); }
-  .word-bottom { color: var(--lavender); }
+  /* Bottom group word shown first (left), Top group word shown second (right) */
+  .word-bottom-display { color: var(--sage); }
+  .word-top-display { color: var(--lavender); }
 
   .separator {
     font-family: 'Space Mono', monospace;
@@ -154,7 +155,7 @@
   button:active { transform: scale(0.97); }
 
   .btn-roll {
-    background: var(--coral);
+    background: var(--sage);
     color: var(--black);
     flex: 1;
     min-width: 160px;
@@ -209,8 +210,8 @@
     margin-bottom: 0.6rem;
   }
 
-  .pool-label.top { color: var(--coral); }
-  .pool-label.bottom { color: var(--lavender); }
+  .pool-label.top { color: var(--lavender); }
+  .pool-label.bottom { color: var(--sage); }
 
   .pool-words {
     display: flex;
@@ -227,10 +228,10 @@
     opacity: 0.7;
   }
 
-  .tag.top { background: rgba(255,95,109,0.12); color: var(--coral); }
-  .tag.top.active { opacity: 1; background: rgba(255,95,109,0.25); }
-  .tag.bottom { background: rgba(180,142,255,0.12); color: var(--lavender); }
-  .tag.bottom.active { opacity: 1; background: rgba(180,142,255,0.25); }
+  .tag.top { background: rgba(180,142,255,0.12); color: var(--lavender); }
+  .tag.top.active { opacity: 1; background: rgba(180,142,255,0.25); }
+  .tag.bottom { background: rgba(141,184,154,0.12); color: var(--sage); }
+  .tag.bottom.active { opacity: 1; background: rgba(141,184,154,0.25); }
 
   .footer-note {
     margin-top: 2.5rem;
@@ -262,9 +263,10 @@
 
 <div class="stage" id="stage">
   <div class="result-container">
-    <span class="word word-top" id="wordTop">???</span>
+    <!-- Bottom word first, top word second — reads as a real aesthetic name -->
+    <span class="word word-bottom-display" id="wordBottomDisplay">???</span>
     <span class="separator">/</span>
-    <span class="word word-bottom" id="wordBottom">???</span>
+    <span class="word word-top-display" id="wordTopDisplay">???</span>
   </div>
   <p class="hint" id="hint">HIT ROLL TO GENERATE YOUR AESTHETIC</p>
 </div>
@@ -277,12 +279,12 @@
 
 <div class="word-pool">
   <div class="pool-group">
-    <p class="pool-label top">Top Group</p>
-    <div class="pool-words" id="poolTop"></div>
-  </div>
-  <div class="pool-group">
     <p class="pool-label bottom">Bottom Group</p>
     <div class="pool-words" id="poolBottom"></div>
+  </div>
+  <div class="pool-group">
+    <p class="pool-label top">Top Group</p>
+    <div class="pool-words" id="poolTop"></div>
   </div>
 </div>
 
@@ -315,27 +317,25 @@
 
   function roll() {
     const stage = document.getElementById('stage');
-    const topEl = document.getElementById('wordTop');
-    const bottomEl = document.getElementById('wordBottom');
+    const bottomDisplayEl = document.getElementById('wordBottomDisplay');
+    const topDisplayEl = document.getElementById('wordTopDisplay');
     const hint = document.getElementById('hint');
 
-    // Clear previous active tags
     document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
 
     currentTop = pick(TOP);
     currentBottom = pick(BOTTOM);
 
-    // Glitch flash
     stage.classList.remove('flashing');
     void stage.offsetWidth;
     stage.classList.add('flashing');
     setTimeout(() => stage.classList.remove('flashing'), 400);
 
-    topEl.textContent = currentTop.toUpperCase();
-    bottomEl.textContent = currentBottom.toUpperCase();
-    hint.textContent = `${currentTop} + ${currentBottom}`;
+    // Display order: Bottom first, Top second
+    bottomDisplayEl.textContent = currentBottom.toUpperCase();
+    topDisplayEl.textContent = currentTop.toUpperCase();
+    hint.textContent = `${currentBottom} ${currentTop}`;
 
-    // Highlight active tags
     const tTop = document.getElementById(`tag-${currentTop}`);
     const tBot = document.getElementById(`tag-${currentBottom}`);
     if (tTop) tTop.classList.add('active');
@@ -344,7 +344,7 @@
 
   function copyResult() {
     if (!currentTop || !currentBottom) return;
-    const text = `${currentTop} ${currentBottom}`;
+    const text = `${currentBottom} ${currentTop}`;
     navigator.clipboard.writeText(text).then(() => {
       const confirm = document.getElementById('copyConfirm');
       confirm.classList.add('show');
@@ -352,7 +352,6 @@
     });
   }
 
-  // Spacebar also rolls
   document.addEventListener('keydown', e => {
     if (e.code === 'Space') { e.preventDefault(); roll(); }
   });
