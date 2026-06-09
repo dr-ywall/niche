@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niche Aesthetic Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0f;
+    --lavender: #b48eff;
+    --coral: #ff5f6d;
+    --bone: #e8e0d0;
+    --fog: #2a2a38;
+    --fog-light: #3a3a4e;
+  }
+
+  body {
+    background: var(--black);
+    color: var(--bone);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--lavender);
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    letter-spacing: 0.08em;
+    text-align: center;
+    color: var(--bone);
+    margin-bottom: 0.3rem;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--fog-light);
+    letter-spacing: 0.15em;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    background: var(--fog);
+    border: 1px solid var(--fog-light);
+    border-radius: 4px;
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .stage::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--coral), var(--lavender));
+  }
+
+  .result-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    min-height: 5rem;
+  }
+
+  .word {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 12vw, 5.5rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    transition: opacity 0.08s;
+  }
+
+  .word-top { color: var(--coral); }
+  .word-bottom { color: var(--lavender); }
+
+  .separator {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.2rem;
+    color: var(--fog-light);
+    align-self: center;
+    padding-bottom: 0.2rem;
+  }
+
+  .stage.flashing .word {
+    animation: glitch 0.35s steps(1) forwards;
+  }
+
+  @keyframes glitch {
+    0%   { opacity: 1; transform: skewX(0deg); }
+    10%  { opacity: 0; transform: skewX(-8deg) translateX(-4px); }
+    20%  { opacity: 1; transform: skewX(5deg) translateX(3px); color: #fff; }
+    30%  { opacity: 0; }
+    40%  { opacity: 1; transform: skewX(-3deg); }
+    50%  { opacity: 0.3; transform: translateY(-2px); }
+    60%  { opacity: 1; transform: skewX(0deg); }
+    80%  { opacity: 0.7; }
+    100% { opacity: 1; transform: skewX(0deg) translateX(0); }
+  }
+
+  .hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--fog-light);
+    letter-spacing: 0.1em;
+    margin-top: 1.5rem;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  button {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+    padding: 0.75rem 2rem;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+
+  button:active { transform: scale(0.97); }
+
+  .btn-roll {
+    background: var(--coral);
+    color: var(--black);
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .btn-roll:hover { opacity: 0.88; }
+
+  .btn-copy {
+    background: transparent;
+    color: var(--lavender);
+    border: 1px solid var(--lavender);
+    flex: 0 0 auto;
+  }
+
+  .btn-copy:hover { background: rgba(180,142,255,0.1); }
+
+  .copy-confirm {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--lavender);
+    text-align: center;
+    margin-top: 0.75rem;
+    height: 1em;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .copy-confirm.show { opacity: 1; }
+
+  .word-pool {
+    max-width: 520px;
+    width: 100%;
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .pool-group {
+    background: var(--fog);
+    border: 1px solid var(--fog-light);
+    border-radius: 3px;
+    padding: 1rem 1.2rem;
+  }
+
+  .pool-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .pool-label.top { color: var(--coral); }
+  .pool-label.bottom { color: var(--lavender); }
+
+  .pool-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+
+  .tag.top { background: rgba(255,95,109,0.12); color: var(--coral); }
+  .tag.top.active { opacity: 1; background: rgba(255,95,109,0.25); }
+  .tag.bottom { background: rgba(180,142,255,0.12); color: var(--lavender); }
+  .tag.bottom.active { opacity: 1; background: rgba(180,142,255,0.25); }
+
+  .footer-note {
+    margin-top: 2.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--fog-light);
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+
+  .footer-note a {
+    color: var(--lavender);
+    text-decoration: none;
+  }
+
+  .footer-note a:hover { text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    .word-pool { grid-template-columns: 1fr; }
+    .stage { padding: 2rem 1.2rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">for Ashley &amp; Taliesin</p>
+<h1>Build Your Niche Aesthetic</h1>
+<p class="subtitle">Pick one from each group · build a mood board · share it</p>
+
+<div class="stage" id="stage">
+  <div class="result-container">
+    <span class="word word-top" id="wordTop">???</span>
+    <span class="separator">/</span>
+    <span class="word word-bottom" id="wordBottom">???</span>
+  </div>
+  <p class="hint" id="hint">HIT ROLL TO GENERATE YOUR AESTHETIC</p>
+</div>
+
+<div class="btn-row">
+  <button class="btn-roll" id="rollBtn" onclick="roll()">Roll</button>
+  <button class="btn-copy" id="copyBtn" onclick="copyResult()">Copy</button>
+</div>
+<p class="copy-confirm" id="copyConfirm">copied to clipboard</p>
+
+<div class="word-pool">
+  <div class="pool-group">
+    <p class="pool-label top">Top Group</p>
+    <div class="pool-words" id="poolTop"></div>
+  </div>
+  <div class="pool-group">
+    <p class="pool-label bottom">Bottom Group</p>
+    <div class="pool-words" id="poolBottom"></div>
+  </div>
+</div>
+
+<p class="footer-note">Submit your mood board at <a href="https://critrole.com/submit/" target="_blank">critrole.com/submit/</a></p>
+
+<script>
+  const TOP = ["Delia","Pastel","Core","Punk","Smith","House","Sleaze","Wear","Trash","Tech","Gothic","Pulp","Void","Toxic"];
+  const BOTTOM = ["Slime","Lunar","Asphalt","Swamp","Ghost","Plastic","Prep","Atom","Frost","Angel","Retro","Pop","Bubble","Metal","Cozy","Ocean","Industrial"];
+
+  let currentTop = null;
+  let currentBottom = null;
+
+  function buildPool(words, groupId, cls) {
+    const container = document.getElementById(groupId);
+    words.forEach(w => {
+      const tag = document.createElement('span');
+      tag.className = `tag ${cls}`;
+      tag.id = `tag-${w}`;
+      tag.textContent = w;
+      container.appendChild(tag);
+    });
+  }
+
+  buildPool(TOP, 'poolTop', 'top');
+  buildPool(BOTTOM, 'poolBottom', 'bottom');
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function roll() {
+    const stage = document.getElementById('stage');
+    const topEl = document.getElementById('wordTop');
+    const bottomEl = document.getElementById('wordBottom');
+    const hint = document.getElementById('hint');
+
+    // Clear previous active tags
+    document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+
+    currentTop = pick(TOP);
+    currentBottom = pick(BOTTOM);
+
+    // Glitch flash
+    stage.classList.remove('flashing');
+    void stage.offsetWidth;
+    stage.classList.add('flashing');
+    setTimeout(() => stage.classList.remove('flashing'), 400);
+
+    topEl.textContent = currentTop.toUpperCase();
+    bottomEl.textContent = currentBottom.toUpperCase();
+    hint.textContent = `${currentTop} + ${currentBottom}`;
+
+    // Highlight active tags
+    const tTop = document.getElementById(`tag-${currentTop}`);
+    const tBot = document.getElementById(`tag-${currentBottom}`);
+    if (tTop) tTop.classList.add('active');
+    if (tBot) tBot.classList.add('active');
+  }
+
+  function copyResult() {
+    if (!currentTop || !currentBottom) return;
+    const text = `${currentTop} ${currentBottom}`;
+    navigator.clipboard.writeText(text).then(() => {
+      const confirm = document.getElementById('copyConfirm');
+      confirm.classList.add('show');
+      setTimeout(() => confirm.classList.remove('show'), 1800);
+    });
+  }
+
+  // Spacebar also rolls
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); roll(); }
+  });
+</script>
+</body>
+</html>
